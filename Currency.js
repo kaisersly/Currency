@@ -1,4 +1,9 @@
 var test = new TestJs("document");
+var test = {
+    assert: function () {},
+    clear: function () {},
+    stop: function () {}
+};
 
 var Change = function (from, to, rate) {
     var Change = {
@@ -34,7 +39,7 @@ test.assert(change.convert(120, "to"), 1, "convert 120 YEN to 1 EUR");
 change.direction = "to";
 test.assert(change.convert(120), 1, "convert 120 YEN to 1 EUR");
 
-test.clear();
+
 
 var ChangeList = function (changes) {
     var ChangeList = {};
@@ -82,7 +87,18 @@ var ChangeList = function (changes) {
         ChangeList.changes
         return change;
     };
-    
+//    Convert one value with all known changes
+    ChangeList.convert = function (value, from) {
+        var values = [];
+        ChangeList.changes.forEach(function(change) {
+            if (change.from === from) {
+                values.push([change.convert(value), change.to]);
+            } else if (change.to === from) {
+                values.push([change.convert(value, "to"), change.from]);
+            }
+        });
+        return values;
+    }
     ChangeList.destroy = function (from, to) {
         var id = ChangeList.findId(from, to);
         ChangeList.changes.splice(id, 1);
@@ -99,13 +115,16 @@ var changeList = new ChangeList(changes);
 test.assert(changeList.find("EUR", "YEN").convert(1), 120, "find EUR to YEN and change 1 EUR to 120 YEN" );
 test.assert(changeList.find("YEN", "EUR").convert(120), 1, "find YEN to EUR and change 120 YEN to 1 EUR" );
 test.assert(changeList.find("EUR", "USD").convert(10), 12.8, "find EUR to USD and change 10 EUR to 12.8 USD" );
+test.assert(changeList.convert(1, "EUR")[0][0], 120, "mass convert 1 EUR to 120 YEN");
+test.assert(changeList.convert(1, "EUR")[0][1], "YEN", "mass convert 1 EUR to 120 YEN");
+test.assert(changeList.convert(1, "EUR")[1][0], 1.28, "mass convert 1 EUR to 1.28 USD");
+test.assert(changeList.convert(1, "EUR")[1][1], "USD", "mass convert 1 EUR to 1.28 USD");
+
 changeList.destroy("EUR", "YEN");
 test.assert(changeList.find("EUR", "YEN"), undefined, "EUR to YEN is deleted");
 test.assert(changeList.add("EUR", "USD", 1.27).convert(1), 1.27, "update EUR to USD and convert 1 EUR to 1.27 USD");
 test.assert(changeList.add("EUR", "YEN", 115).convert(1), 115, "create EUR to YEN and convert 1 EUR to 115 YEN");
 test.assert(changeList.add("YEN", "EUR", 1/115).convert(1), 115, "update YEN to EUR and convert 1 EUR to 115 YEN");
-
-test.clear();
 
 
 
@@ -121,8 +140,6 @@ var Currency = function (name, symbol) {
 var yen = new Currency("YEN", "Y");
 test.assert(yen.name, "YEN", "name is YEN");
 test.assert(yen.symbol, "Y", "symbol is Y");
-
-test.clear();
 
 
 
@@ -165,3 +182,53 @@ test.assert(currencyList.find("EUR").name, "EUR", "find EUR");
 test.assert(currencyList.add("YEN", "Y").symbol, "Y", "create YEN");
 test.assert(currencyList.add("EUR", "e").symbol, "e", "update EUR");
 test.assert(currencyList.currencies.length, 2, "currencies has 2 items");
+
+
+
+function Expense (name, price, currencyName, quantity) {
+    var Expense = {
+        name: name,
+        price: price,
+        currencyName: currencyName,
+        quantity: quantity
+    };
+    Expense.total = function () {
+        return Expense.price * Expense.quantity;
+    };
+    Expense.convert = function (changeList, to, copy) {
+        if (copy === undefined) {
+            copy = true;
+        }
+        var expense = copy ? Object.create(Expense) : Expense;
+        if (Expense.currencyName !== to) {
+            var change = changeList.find(Expense.currencyName, to);
+            if (change) {
+                expense.price = change.convert(expense.price);
+                expense.currencyName = change.direction === "from" ? change.to : change.from;
+            }
+        }
+        return expense;
+    };
+    return Expense;
+}
+
+var changes = [
+    new Change("EUR", "YEN", 100)
+]
+var changeList = new ChangeList(changes);
+var expense = new Expense("hotel", 5000, "YEN", 2);
+test.assert(expense.total(), 10000, "total is 10000");
+test.assert(expense.convert(changeList, "YEN").price, 5000, "convert 5000 YEN to 5000 YEN");
+test.assert(expense.convert(changeList, "EUR").price, 50, "convert 5000 YEN to 50 EUR");
+
+
+
+function ExpenseList (expenses) {
+    var Expense = {};
+    if (expenses) {
+        Expense.expenses = expenses;
+    } else {
+        Expense.expenses = [];
+    }
+    return Expense;
+}
