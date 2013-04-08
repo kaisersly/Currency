@@ -210,6 +210,11 @@ function Expense (name, price, currencyName, quantity) {
             if (change) {
                 expense.price = change.convert(expense.price);
                 expense.currencyName = change.direction === "from" ? change.to : change.from;
+                expense.quantity = Expense.quantity;
+                expense.total = function () {
+                    return expense.price * expense.quantity;
+                };
+                expense.converted = true;
             }
         }
         return expense;
