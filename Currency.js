@@ -82,9 +82,8 @@ var ChangeList = function (changes) {
             }
         } else {
             change = new Change(from, to, rate);
-            changeList.changes.push(change);
+            ChangeList.changes.push(change);
         }
-        ChangeList.changes
         return change;
     };
 //    Convert one value with all known changes
