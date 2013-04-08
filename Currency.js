@@ -105,7 +105,6 @@ var ChangeList = function (changes) {
     
     return ChangeList;
 }
-
 var changes = [
     new Change("EUR", "YEN", 120),
     new Change("EUR", "USD", 1.28)
@@ -124,7 +123,6 @@ test.assert(changeList.find("EUR", "YEN"), undefined, "EUR to YEN is deleted");
 test.assert(changeList.add("EUR", "USD", 1.27).convert(1), 1.27, "update EUR to USD and convert 1 EUR to 1.27 USD");
 test.assert(changeList.add("EUR", "YEN", 115).convert(1), 115, "create EUR to YEN and convert 1 EUR to 115 YEN");
 test.assert(changeList.add("YEN", "EUR", 1/115).convert(1), 115, "update YEN to EUR and convert 1 EUR to 115 YEN");
-
 
 
 var Currency = function (name, symbol) {
@@ -169,6 +167,13 @@ var CurrencyList = function (currencies) {
         }
         return currency;
     };
+    CurrencyList.toHash = function () {
+        var hash = {};
+        CurrencyList.currencies.forEach(function (currency) {
+            hash[currency.name] = currency.symbol;
+        });
+        return hash;
+    }
     
     return CurrencyList;
 }
@@ -181,6 +186,7 @@ test.assert(currencyList.find("EUR").name, "EUR", "find EUR");
 test.assert(currencyList.add("YEN", "Y").symbol, "Y", "create YEN");
 test.assert(currencyList.add("EUR", "e").symbol, "e", "update EUR");
 test.assert(currencyList.currencies.length, 2, "currencies has 2 items");
+test.assert(currencyList.toHash()["YEN"], "Y", "currencies Hash['YEN'] is 'Y'");
 
 
 
