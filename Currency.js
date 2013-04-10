@@ -234,11 +234,28 @@ test.assert(expense.convert(changeList, "EUR").price, 50, "convert 5000 YEN to 5
 
 
 function ExpenseList (expenses) {
-    var Expense = {};
+    var ExpenseList = {};
     if (expenses) {
-        Expense.expenses = expenses;
+        ExpenseList.expenses = expenses;
     } else {
-        Expense.expenses = [];
+        ExpenseList.expenses = [];
     }
-    return Expense;
+//    ExpenseList.find = function (name) {
+//        var expense;
+//        ExpenseList.expenses.forEach(function (e) {
+//            if (e.name === name) {
+//                expense = e;
+//            }
+//        });
+//        return expense;
+//    };
+//    Create
+    ExpenseList.add = function (expense) {
+        ExpenseList.expenses.push(expense);
+    };
+    ExpenseList.destroy = function (i) {
+        ExpenseList.expenses.splice(i,1);
+    };
+    
+    return ExpenseList;
 }
