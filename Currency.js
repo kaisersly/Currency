@@ -240,15 +240,6 @@ function ExpenseList (expenses) {
     } else {
         ExpenseList.expenses = [];
     }
-//    ExpenseList.find = function (name) {
-//        var expense;
-//        ExpenseList.expenses.forEach(function (e) {
-//            if (e.name === name) {
-//                expense = e;
-//            }
-//        });
-//        return expense;
-//    };
 //    Create
     ExpenseList.add = function (expense) {
         ExpenseList.expenses.push(expense);
