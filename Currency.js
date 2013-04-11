@@ -1,4 +1,4 @@
-var test = new TestJs("document");
+//var test = new TestJs("document");
 var test = {
     assert: function () {},
     clear: function () {},
